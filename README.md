@@ -8,7 +8,7 @@
 ## Table of contents  
 
 > ### 0. [Short description](#description)
-> ### 1. [Initial setup](#project-structure)
+> ### 1. [Project structure](#project-structure)
 > ### 2. [Initial setup](#initial-setup)
 > ### 3. [Run the script](#run-the-script)
 > ### 4. [Tests]("#tests"")
