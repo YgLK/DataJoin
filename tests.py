@@ -48,8 +48,8 @@ class TestDataJoin(unittest.TestCase):
 
         print(joined_files.head())
 
-        self.assertEqual(1, first_join_col_idx, "First file join column index is incorrect")
-        self.assertEqual(1, second_join_col_idx, "Second file join column index is incorrect")
+        self.assertEqual(1, first_join_col_idx, "First file join column index is incorrect.")
+        self.assertEqual(1, second_join_col_idx, "Second file join column index is incorrect.")
         self.assertEqual(column_after_join_count, len(header_columns), "Header has wrong column number.")
 
 
@@ -60,7 +60,7 @@ class TestDataJoin(unittest.TestCase):
         sys.stdout = mystdout = StringIO()
 
         # join the data
-        join.perform_join("data/data11.csv", "data/data12.csv", "day", join_type)
+        join.perform_join(self.filepath1, self.filepath2, "day", join_type)
 
         # get back to the old stdout
         sys.stdout = old_stdout
@@ -77,23 +77,23 @@ class TestDataJoin(unittest.TestCase):
         # omit blank records and header when counting
         records_count = [x for x in stdout_string.split("\n") if x != ''][1:]
         print(records_count)
-        self.assertEqual(len(joined_files), len(records_count))
+        self.assertEqual(len(joined_files), len(records_count), "There are missing records in the joined data.")
 
-
-    def test_record_count_inner(self):           # I did actually for the record count test
+    """ Check if returned joined data has correct record count - inner join """
+    def test_record_count_inner(self):
         self.template_test_record_count("inner")
 
-
+    """ Check if returned joined data has correct record count - left join """
     def test_test_record_count_left(self):
         self.template_test_record_count("left")
 
-
+    """ Check if returned joined data has correct record count - right join """
     def test_test_record_count_right(self):
         self.template_test_record_count("right")
 
 
     """ Check if each column has corresponding value. """
-    def template_test_column_values_count(self, join_type):  # DONE
+    def template_test_column_values_count(self, join_type):
         # redirect stdout
         old_stdout = sys.stdout
         sys.stdout = mystdout = StringIO()
@@ -128,10 +128,10 @@ class TestDataJoin(unittest.TestCase):
         # column min and max should be equal so its not compulsory to calculate avg
         col_val_count = (min_val_count + max_val_count) / 2
 
-        # check if each row contains the same value
-        self.assertTrue(min_val_count == max_val_count)
-        # check if column value for each row occurs and is correct
-        self.assertEqual(len(joined_files.columns), col_val_count)
+        # check if each row contains the same number of values
+        self.assertTrue(min_val_count == max_val_count, "Number of column values in records are divergent")
+        # check if column value for each row occurs
+        self.assertEqual(len(joined_files.columns), col_val_count, "There are missing in records")
 
 
     """ Check if each column has corresponding value - inner join """
