@@ -1,3 +1,4 @@
+import math
 import unittest
 # pandas is used to data validation in tests
 import pandas as pd
@@ -16,11 +17,9 @@ class TestDataJoin(unittest.TestCase):
         self.first_test_validator = pd.read_csv(self.filepath1)
         self.second_test_validator = pd.read_csv(self.filepath2)
 
-    """
-    Check if the generator reads all of the csv file records.
-    """
 
-    def test_generator_record_count(self):  # DONE
+    """ Check if the generator reads all of the csv file records. """
+    def test_generator_record_count(self):
         # create generator
         generator = join.csv_record_generator(self.filepath1)
         num_of_records = 0
@@ -34,11 +33,9 @@ class TestDataJoin(unittest.TestCase):
         # assert equality
         self.assertEqual(len(csv_pandas), num_of_records, "Record counts are not equal.")
 
-    """
-    Check if returned joining column indexes and final headers are accurate.
-    """
 
-    def test_data_preparation(self):  # DONE
+    """ Check if returned joining column indexes and final headers are accurate. """
+    def test_data_preparation(self):
         join_column = "day"
         join_type = "inner"
         first_join_col_idx, second_join_col_idx, final_headers = join.prepare_data(self.filepath1, self.filepath2,
@@ -53,15 +50,11 @@ class TestDataJoin(unittest.TestCase):
 
         self.assertEqual(1, first_join_col_idx, "First file join column index is incorrect")
         self.assertEqual(1, second_join_col_idx, "Second file join column index is incorrect")
-        # DATE column name in the date12.csv had to be changed to DATE2
-        # because caused overlapping in the pandas merge (date from the second file didn't exist in the joined_files)
         self.assertEqual(column_after_join_count, len(header_columns), "Header has wrong column number.")
 
-    """
-    Check if returned joined data has correct record count.
-    """
 
-    def template_test_record_count(self, join_type):  # DONE
+    """ Check if returned joined data has correct record count. """
+    def template_test_record_count(self, join_type):
         # redirect stdout
         old_stdout = sys.stdout
         sys.stdout = mystdout = StringIO()
@@ -86,43 +79,75 @@ class TestDataJoin(unittest.TestCase):
         print(records_count)
         self.assertEqual(len(joined_files), len(records_count))
 
-    """
-    Check if all rows has the same length/column values - inner join
-    """
 
+    def test_record_count_inner(self):           # I did actually for the record count test
+        self.template_test_record_count("inner")
+
+
+    def test_test_record_count_left(self):
+        self.template_test_record_count("left")
+
+
+    def test_test_record_count_right(self):
+        self.template_test_record_count("right")
+
+
+    """ Check if each column has corresponding value. """
+    def template_test_column_values_count(self, join_type):  # DONE
+        # redirect stdout
+        old_stdout = sys.stdout
+        sys.stdout = mystdout = StringIO()
+
+        # join the data
+        join.perform_join("data/data11.csv", "data/data12.csv", "day", join_type)
+
+        # get back to the old stdout
+        sys.stdout = old_stdout
+        # get value of the printed output to string
+        stdout_string = mystdout.getvalue()
+
+        # join data with
+        joined_files = pd.merge(self.first_test_validator, self.second_test_validator, join_type)
+
+        # print caught data
+        print(stdout_string)
+        # omit blank records and header when counting
+        records = [x for x in stdout_string.split("\n") if x != ''][1:]
+
+        # count of record values
+        min_val_count = math.inf
+        max_val_count = 0
+
+        for rec in records:
+            record_val_count = len(rec.split(","))
+            if record_val_count < min_val_count:
+                min_val_count = record_val_count
+            if record_val_count > max_val_count:
+                max_val_count = record_val_count
+
+        # column min and max should be equal so its not compulsory to calculate avg
+        col_val_count = (min_val_count + max_val_count) / 2
+
+        # check if each row contains the same value
+        self.assertTrue(min_val_count == max_val_count)
+        # check if column value for each row occurs and is correct
+        self.assertEqual(len(joined_files.columns), col_val_count)
+
+
+    """ Check if each column has corresponding value - inner join """
     def test_column_values_count_inner(self):
-        self.template_test_column_values("inner")
+        self.template_test_column_values_count("inner")
 
-    """
-    Check if all rows has the same length/column values - left join
-    """
 
+    """ Check if each column has corresponding value - left join """
     def test_column_values_count_left(self):
-        self.template_test_column_values("left")
+        self.template_test_column_values_count("left")
 
-    """
-    Check if all rows has the same length/column values - right join
-    """
 
+    """ Check if each column has corresponding value - right join """
     def test_column_values_count_right(self):
-        self.template_test_column_values("right")
+        self.template_test_column_values_count("right")
 
-    """
-    Check if all rows has the same length/column values - right join
-    """
-    # def test_column_values_count_right(self):
-    #     output = ""
-    # # redirect stdout to string
-    # with io.StringIO() as buf, redirect_stdout(buf):
-    #     join.perform_join(self.filepath1, self.filepath2, "day", "inner")
-    #     output = buf.getvalue()
-    # print(output)
-
-    """
-    Check if each join type has correct record count
-    """
-    # def test_join_record_count(self):
-    #     return "TODO"
 
 
 if __name__ == '__main__':
