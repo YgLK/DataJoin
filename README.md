@@ -59,7 +59,6 @@ You can also check Jupyter Notebook where
     │    └── data12.csv         # CSV dataset used for testing (Kaggle)
     ├── join.py                 # Project source code file
     ├── tests.py                # Project tests
-    ├── sonar-cube              # SonarQube raport
     ├── .gitignore              
     ├── LICENSE
     └── README.md
