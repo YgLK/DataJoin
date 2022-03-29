@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
 import sys
+import os
 
 
 # generators are used to prevent lack of memory to store the data in the local machine
 def csv_record_generator(filepath):
+    # check if file path points to CSV file
+    if not filepath.endswith(".csv"):
+        raise ValueError("File must have .csv extension")
+    # check if file exists
+    elif not os.path.isfile(filepath):
+        raise FileNotFoundError("File doesn't exist, check entered filepath")
+    # read data from file
     with open(filepath) as csv_file:
         for record in csv_file:
             yield record
 
 
+# prepare data for joining
 def prepare_data(path1, path2, join_col, join_type):
     # get data from files with the use of generators
     gen1 = csv_record_generator(path1)
@@ -28,11 +37,25 @@ def prepare_data(path1, path2, join_col, join_type):
         final_headers = header1 + "," + header2.replace(join_col + ",", "").replace("," + join_col, "")
     elif join_type == "right":
         final_headers = header2.replace(join_col + ",", "").replace("," + join_col, "") + "," + header1
+    else:
+        raise ValueError("Incorrect join type. Possible join types: inner, left, right")
+
     # get join column indexes
-    join_col_idx1 = columns_names_1.index(join_col)
-    join_col_idx2 = columns_names_2.index(join_col)
+    try:
+        join_col_idx1 = columns_names_1.index(join_col)
+        join_col_idx2 = columns_names_2.index(join_col)
+    except ValueError:
+        raise ValueError("Column to be joined on must appear in both CSV files")
 
     return join_col_idx1, join_col_idx2, final_headers
+
+
+def split_record(first_row):
+    # remove break line from the row
+    first_row = first_row.replace("\n", "")
+    # get list of column values in the actual row from first file
+    first_row_split = first_row.split(",")
+    return first_row, first_row_split
 
 
 def inner_join(first_path, second_path, first_join_col_idx, second_join_col_idx):
@@ -41,19 +64,13 @@ def inner_join(first_path, second_path, first_join_col_idx, second_join_col_idx)
     _ = next(first_gen)
     # iterate through rows from each file and perform inner join
     for first_row in first_gen:
-        # remove break line from the row
-        first_row = first_row.replace("\n", "")
-        # get list of column values in the actual row from first file
-        first_row_split = first_row.split(",")
+        first_row, first_row_split = split_record(first_row)
         # redefine second generator to go through each row repeatedly
         second_gen = csv_record_generator(second_path)
         # omit headers
         _ = next(second_gen)
         for second_row in second_gen:
-            # remove break line from the joined row
-            second_row = second_row.replace("\n", "")
-            # get list of column values in the actual row from second file
-            second_row_split = second_row.split(",")
+            second_row, second_row_split = split_record(second_row)
             # check if corresponding values allows to perform inner join
             if first_row_split[first_join_col_idx] == second_row_split[second_join_col_idx]:
                 # remove element from split row to avoid repeating columns
@@ -70,10 +87,7 @@ def left_join(first_filepath, second_filepath, first_join_col_idx, second_join_c
     _ = next(first_gen)
     # iterate through rows from each file and perform inner join
     for first_row in first_gen:
-        # remove break line from the row
-        first_row = first_row.replace("\n", "")
-        # get list of column values in the actual row from first file
-        first_row_split = first_row.split(",")
+        first_row, first_row_split = split_record(first_row)
         # redefine second generator to go through each row repeatedly
         second_gen = csv_record_generator(second_filepath)
         # omit headers
@@ -83,10 +97,7 @@ def left_join(first_filepath, second_filepath, first_join_col_idx, second_join_c
         # count of missing values to fill when the left join doesnt find corresponding right row
         sec_row_Len = len(_) - 1
         for second_row in second_gen:
-            # remove break line from the joined row
-            second_row = second_row.replace("\n", "")
-            # get list of column values in the actual row from second file
-            second_row_split = second_row.split(",")
+            second_row, second_row_split = split_record(second_row)
             # check if corresponding values allows to perform left join
             if first_row_split[first_join_col_idx] == second_row_split[second_join_col_idx]:
                 # remove element from split row to avoid repeating columns
@@ -103,38 +114,35 @@ def left_join(first_filepath, second_filepath, first_join_col_idx, second_join_c
             print(joined_row[:-1])
 
 
-def perform_join(filepath1, filepath2, join_col, join):
+# merge data with the specified join type
+def perform_join(first_filepath, second_filepath, join_col, join):
     # data preparation
-    first_join_col_idx, second_join_col_idx, final_headers = prepare_data(filepath1, filepath2, join_col, join)
+    first_join_col_idx, second_join_col_idx, final_headers = prepare_data(first_filepath, second_filepath, join_col,
+                                                                          join)
 
     # print joined table header with removed duplicated join column name
     print(final_headers)
 
     # perform the join of two csv files
     if join == "inner":
-        inner_join(filepath1, filepath2, first_join_col_idx, second_join_col_idx)
+        inner_join(first_filepath, second_filepath, first_join_col_idx, second_join_col_idx)
     elif join == "left":
-        left_join(filepath1, filepath2, first_join_col_idx, second_join_col_idx)
+        left_join(first_filepath, second_filepath, first_join_col_idx, second_join_col_idx)
     # right_join can be performed by using left_join method with the file paths and
     # join columns indexes swapped with each other
     elif join == "right":
-        left_join(filepath2, filepath1, second_join_col_idx, first_join_col_idx)
+        left_join(second_filepath, first_filepath, second_join_col_idx, first_join_col_idx)
 
 
 if __name__ == "__main__":
     # read arguments
-    first_filepath, second_filepath = sys.argv[1], sys.argv[2]
+    first_csv_filepath, second_csv_filepath = sys.argv[1], sys.argv[2]
+    if len(sys.argv) < 4:
+        raise ValueError("Column name to join on is missing")
     join_column = sys.argv[3]
     # set default join type as inner
-    join_type = "inner"
+    join = "inner"
     if len(sys.argv) == 5:
-        join_type = sys.argv[4]
+        join = sys.argv[4]
 
-    perform_join(first_filepath, second_filepath, join_column, join_type)
-
-
-    # test with the sample data
-    # perform_join("data/loan.csv", "data/borrower.csv", "LOAN_NO", "inner")
-    # test with the different data
-    # perform_join("data/data11.csv", "data/data12.csv", "date", "left")
-
+    perform_join(first_csv_filepath, second_csv_filepath, join_column, join)
