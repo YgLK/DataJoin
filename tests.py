@@ -18,8 +18,8 @@ class TestDataJoin(unittest.TestCase):
         self.second_test_validator = pd.read_csv(self.filepath2)
 
 
-    """ Check if the generator reads all of the csv file records. """
     def test_generator_record_count(self):
+        """ Check if the generator reads all of the csv file records. """
         # create generator
         generator = join.csv_record_generator(self.filepath1)
         num_of_records = 0
@@ -33,8 +33,8 @@ class TestDataJoin(unittest.TestCase):
         self.assertEqual(len(csv_pandas), num_of_records, "Record counts are not equal.")
 
 
-    """ Check if returned joining column indexes and final headers are accurate. """
     def test_data_preparation(self):
+        """ Check if returned joining column indexes and final headers are accurate. """
         join_column = "day"
         join_type = "inner"
         first_join_col_idx, second_join_col_idx, final_headers = join.prepare_data(self.filepath1, self.filepath2,
@@ -52,8 +52,8 @@ class TestDataJoin(unittest.TestCase):
         self.assertEqual(column_after_join_count, len(header_columns), "Header has wrong column number.")
 
 
-    """ Check if returned joined data has correct record count. """
     def template_test_record_count(self, join_type):
+        """ Check if returned joined data has correct record count. """
         # redirect stdout
         old_stdout = sys.stdout
         sys.stdout = mystdout = StringIO()
@@ -78,21 +78,21 @@ class TestDataJoin(unittest.TestCase):
         print(records_count)
         self.assertEqual(len(joined_files), len(records_count), "There are missing records in the joined data.")
 
-    """ Check if returned joined data has correct record count - inner join """
     def test_record_count_inner(self):
+        """ Check if returned joined data has correct record count - inner join """
         self.template_test_record_count("inner")
 
-    """ Check if returned joined data has correct record count - left join """
     def test_test_record_count_left(self):
+        """ Check if returned joined data has correct record count - left join """
         self.template_test_record_count("left")
 
-    """ Check if returned joined data has correct record count - right join """
     def test_test_record_count_right(self):
+        """ Check if returned joined data has correct record count - right join """
         self.template_test_record_count("right")
 
 
-    """ Check if each column has corresponding value. """
     def template_test_column_values_count(self, join_type):
+        """ Check if each column has corresponding value. """
         # redirect stdout
         old_stdout = sys.stdout
         sys.stdout = mystdout = StringIO()
@@ -133,18 +133,18 @@ class TestDataJoin(unittest.TestCase):
         self.assertEqual(len(joined_files.columns), col_val_count, "There are missing in records")
 
 
-    """ Check if each column has corresponding value - inner join """
     def test_column_values_count_inner(self):
+        """ Check if each column has corresponding value - inner join """
         self.template_test_column_values_count("inner")
 
 
-    """ Check if each column has corresponding value - left join """
     def test_column_values_count_left(self):
+        """ Check if each column has corresponding value - left join """
         self.template_test_column_values_count("left")
 
 
-    """ Check if each column has corresponding value - right join """
     def test_column_values_count_right(self):
+        """ Check if each column has corresponding value - right join """
         self.template_test_column_values_count("right")
 
 
