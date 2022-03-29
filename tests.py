@@ -26,11 +26,10 @@ class TestDataJoin(unittest.TestCase):
         # omit header
         _ = next(generator)
         # count records
-        for record in generator:
+        for _ in generator:
             num_of_records += 1
         # read csv with pandas to check if record number is correct
         csv_pandas = pd.read_csv(self.filepath1)
-        # assert equality
         self.assertEqual(len(csv_pandas), num_of_records, "Record counts are not equal.")
 
 

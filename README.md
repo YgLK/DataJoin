@@ -19,9 +19,9 @@
 
 ## Short description  <a name="description"></a>
 
-**DataJoin** is an executable program, which reads two csv files, joins them on the specified column and then print 
+**DataJoin** is an executable program, which reads two csv files, joins them on the specified column and then prints 
 the result to the standard output.  It's possible to specify the join type (inner, left or right). 
-Script can be performed on the input which can be bigger than the available machine memory, 
+Script can be performed on the **input** which **can be bigger than the available machine memory**, 
 because data is read with the use of the python generators which do not store their contents in memory.
 
 The program is executed with the following command: 
@@ -134,8 +134,7 @@ After completing previous instructions now you can finally use the join script.
 
 
 ## Tests  <a name="description"></a>
-Tests are implemented with the use of **Pandas** library which allows in easy way manipulate with the 
-CSV files.
+Tests are implemented with the use of **Pandas** library which allows easy CSV files manipulation.
 
 In order to run the tests move to the project directory and run:
 ```shell

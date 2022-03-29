@@ -95,7 +95,7 @@ def left_join(first_filepath, second_filepath, first_join_col_idx, second_join_c
         # flag to check if left row found corresponding right row
         is_joined = False
         # count of missing values to fill when the left join doesnt find corresponding right row
-        sec_row_Len = len(_) - 1
+        sec_row_len = len(_) - 1
         for second_row in second_gen:
             second_row, second_row_split = split_record(second_row)
             # check if corresponding values allows to perform left join
@@ -109,7 +109,7 @@ def left_join(first_filepath, second_filepath, first_join_col_idx, second_join_c
                 is_joined = True
         if not is_joined:
             # fill missing value with NaN
-            joined_row = first_row + "," + "NaN," * sec_row_Len
+            joined_row = first_row + "," + "NaN," * sec_row_len
             # print record with omitted last comma character
             print(joined_row[:-1])
 
