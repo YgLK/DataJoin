@@ -153,6 +153,3 @@ python3 tests.py
 | Sample datasets used to check joins correctness | [Kaggle dataset](https://www.kaggle.com/datasets/piterfm/2022-ukraine-russian-war?select=russia_losses_equipment.csv)|
 
 The Kaggle datasets has their missing values filled with NaN (in the Jupyter Notebook with the use of pandas.DataFrame.fillna method) and then saved and used for testing as the `/data/data11.csv` and  `/data/data12.csv` files.
-
-
-
